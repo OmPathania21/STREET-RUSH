@@ -1,0 +1,33 @@
+name: street_rush
+description: Street Rush - An endless traffic dodging mobile game with monetization, ads, and viral growth features.
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flame: ^1.10.0
+  flame_audio: ^2.1.0
+  shared_preferences: ^2.2.2
+  google_mobile_ads: ^5.0.0
+  in_app_purchase: ^3.1.0
+  in_app_review: ^2.0.11
+  share_plus: ^7.0.0
+  firebase_core: ^2.24.0
+  firebase_analytics: ^10.7.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+    - assets/audio/
