@@ -17,45 +17,66 @@ import 'meta/upgrade_system.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  final dataManager = await DataManager.getInstance();
-  final upgradeSystem = UpgradeSystem(dataManager: dataManager);
-  final missionSystem = MissionSystem();
-  final analyticsManager = AnalyticsManager(FirebaseAnalytics.instance);
-  const balanceConfig = GameBalanceConfig();
-  final adsManager = AdsManager(
-    rewardedAdUnitId: 'ca-app-pub-3940256099942544/5224354917',
-    interstitialAdUnitId: 'ca-app-pub-3940256099942544/1033173712',
-    interstitialFrequency: balanceConfig.interstitialEveryNGameOvers,
-  );
-  final retentionManager = RetentionManager(dataManager: dataManager);
-  const shareManager = GrowthShareManager();
-  final reviewPromptManager = ReviewPromptManager(
-    dataManager: dataManager,
-    analyticsManager: analyticsManager,
-    minSessionsBeforePrompt: balanceConfig.reviewMinSessions,
-    minDistanceForPrompt: balanceConfig.reviewDistanceThreshold,
-    promptCooldownDays: balanceConfig.reviewPromptCooldownDays,
-    maxLifetimePrompts: balanceConfig.maxReviewPrompts,
-  );
-  final purchaseManager = PurchaseManager(
-    dataManager: dataManager,
-    analyticsManager: analyticsManager,
-  );
-
-  runApp(
-    StreetRushApp(
+  try {
+    final dataManager = await DataManager.getInstance();
+    final upgradeSystem = UpgradeSystem(dataManager: dataManager);
+    final missionSystem = MissionSystem();
+    
+    // Initialize Firebase Analytics safely
+    FirebaseAnalytics? firebaseAnalytics;
+    try {
+      firebaseAnalytics = FirebaseAnalytics.instance;
+    } catch (_) {
+      print('Firebase Analytics initialization failed, continuing without analytics');
+    }
+    final analyticsManager = AnalyticsManager(firebaseAnalytics);
+    const balanceConfig = GameBalanceConfig();
+    final adsManager = AdsManager(
+      rewardedAdUnitId: 'ca-app-pub-3940256099942544/5224354917',
+      interstitialAdUnitId: 'ca-app-pub-3940256099942544/1033173712',
+      interstitialFrequency: balanceConfig.interstitialEveryNGameOvers,
+    );
+    final retentionManager = RetentionManager(dataManager: dataManager);
+    const shareManager = GrowthShareManager();
+    final reviewPromptManager = ReviewPromptManager(
       dataManager: dataManager,
-      upgradeSystem: upgradeSystem,
-      missionSystem: missionSystem,
-      adsManager: adsManager,
       analyticsManager: analyticsManager,
-      retentionManager: retentionManager,
-      shareManager: shareManager,
-      reviewPromptManager: reviewPromptManager,
-      purchaseManager: purchaseManager,
-      balanceConfig: balanceConfig,
-    ),
-  );
+      minSessionsBeforePrompt: balanceConfig.reviewMinSessions,
+      minDistanceForPrompt: balanceConfig.reviewDistanceThreshold,
+      promptCooldownDays: balanceConfig.reviewPromptCooldownDays,
+      maxLifetimePrompts: balanceConfig.maxReviewPrompts,
+    );
+    final purchaseManager = PurchaseManager(
+      dataManager: dataManager,
+      analyticsManager: analyticsManager,
+    );
+
+    runApp(
+      StreetRushApp(
+        dataManager: dataManager,
+        upgradeSystem: upgradeSystem,
+        missionSystem: missionSystem,
+        adsManager: adsManager,
+        analyticsManager: analyticsManager,
+        retentionManager: retentionManager,
+        shareManager: shareManager,
+        reviewPromptManager: reviewPromptManager,
+        purchaseManager: purchaseManager,
+        balanceConfig: balanceConfig,
+      ),
+    );
+  } catch (e, stack) {
+    print('FATAL ERROR in main(): $e\n$stack');
+    runApp(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Text('Error: $e'),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class StreetRushApp extends StatefulWidget {

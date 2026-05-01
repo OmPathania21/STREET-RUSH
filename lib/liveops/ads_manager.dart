@@ -23,7 +23,11 @@ class AdsManager {
       return;
     }
 
-    await MobileAds.instance.initialize();
+    try {
+      await MobileAds.instance.initialize();
+    } catch (e) {
+      print('Google Mobile Ads initialization failed: $e');
+    }
     _initialized = true;
     _loadRewarded();
     _loadInterstitial();

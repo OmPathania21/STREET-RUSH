@@ -43,28 +43,33 @@ class PurchaseManager {
       return;
     }
 
-    _available = await _iap.isAvailable();
-    if (!_available) {
+    try {
+      _available = await _iap.isAvailable();
+      if (!_available) {
+        _initialized = true;
+        return;
+      }
+
+      final response = await _iap.queryProductDetails(PurchaseCatalog.all);
+      for (final product in response.productDetails) {
+        _products[product.id] = product;
+      }
+
+      _purchaseSubscription = _iap.purchaseStream.listen(
+        _handlePurchaseUpdates,
+        onDone: () {
+          _purchaseSubscription?.cancel();
+        },
+        onError: (_) {
+          // Purchase stream errors should never crash the game.
+        },
+      );
+
       _initialized = true;
-      return;
+    } catch (e) {
+      print('PurchaseManager initialization failed: $e');
+      _initialized = true;
     }
-
-    final response = await _iap.queryProductDetails(PurchaseCatalog.all);
-    for (final product in response.productDetails) {
-      _products[product.id] = product;
-    }
-
-    _purchaseSubscription = _iap.purchaseStream.listen(
-      _handlePurchaseUpdates,
-      onDone: () {
-        _purchaseSubscription?.cancel();
-      },
-      onError: (_) {
-        // Purchase stream errors should never crash the game.
-      },
-    );
-
-    _initialized = true;
   }
 
   Future<bool> buyProduct(String productId) async {

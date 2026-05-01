@@ -1,7 +1,7 @@
 import 'package:flame_audio/flame_audio.dart';
 
 class GameAudioManager {
-  static const String _bgmTrack = 'bgm_loop.mp3';
+  static const String _bgmTrack = 'bgm_loop.wav';
   static const String _coinSfx = 'coin_pickup.wav';
   static const String _crashSfx = 'crash.wav';
 
@@ -40,14 +40,22 @@ class GameAudioManager {
     }
 
     if (!_bgmStarted) {
-      await FlameAudio.bgm.play(_bgmTrack, volume: 0.42);
-      _bgmStarted = true;
-      _bgmPaused = false;
+      try {
+        await FlameAudio.bgm.play(_bgmTrack, volume: 0.42);
+        _bgmStarted = true;
+        _bgmPaused = false;
+      } catch (e) {
+        print('BGM playback failed: $e');
+      }
       return;
     }
 
     if (_bgmPaused) {
-      FlameAudio.bgm.resume();
+      try {
+        FlameAudio.bgm.resume();
+      } catch (e) {
+        print('BGM resume failed: $e');
+      }
       _bgmPaused = false;
     }
   }
